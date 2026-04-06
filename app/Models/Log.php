@@ -10,7 +10,7 @@ class Log extends Model
 {
     use SoftDeletes;
 
-    public const CREATED_AT = 'processed_at';
+    public $timestamps = false;
 
     protected $fillable = [
         'consumer_id',
