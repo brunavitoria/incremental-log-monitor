@@ -54,7 +54,7 @@ class IncrementalLogProcessingTest extends TestCase
 
         File::append(
             $filePath,
-            $this->makeValidLogLine('consumer-3', 'service-c', 300, 30, 360, 1712400200000) . PHP_EOL
+            $this->makeValidLogLine('consumer-3', 'service-c', 300, 30, 360, 1712400200000).PHP_EOL
         );
 
         $this->artisan('logs:processing', ['file_path' => $filePath])
@@ -78,8 +78,8 @@ class IncrementalLogProcessingTest extends TestCase
 
         File::ensureDirectoryExists($directory);
 
-        $filePath = $directory . '/logs_' . uniqid() . '.log';
-        File::put($filePath, implode(PHP_EOL, $lines) . PHP_EOL);
+        $filePath = $directory.'/logs_'.uniqid().'.log';
+        File::put($filePath, implode(PHP_EOL, $lines).PHP_EOL);
 
         return $filePath;
     }

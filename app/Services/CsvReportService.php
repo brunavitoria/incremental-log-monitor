@@ -12,7 +12,7 @@ class CsvReportService
 {
     public function generateConsumersReport(?string $filename = null): string
     {
-        $filename ??= 'consumers_report_' . now()->format('Ymd_His') . '.csv';
+        $filename ??= 'consumers_report_'.now()->format('Ymd_His').'.csv';
 
         $rows = Log::query()
             ->select('consumer_id', DB::raw('COUNT(*) as total_requests'))
@@ -26,10 +26,10 @@ class CsvReportService
             ->all();
 
         return $this->writeCsv(
-            'reports/' . $filename,
+            'reports/'.$filename,
             [
                 'consumer_id',
-                'total_requests'
+                'total_requests',
             ],
             $rows
         );
@@ -37,7 +37,7 @@ class CsvReportService
 
     public function generateServicesReport(?string $filename = null): string
     {
-        $filename ??= 'services_report_' . now()->format('Ymd_His') . '.csv';
+        $filename ??= 'services_report_'.now()->format('Ymd_His').'.csv';
 
         $rows = Log::query()
             ->select('service_name', DB::raw('COUNT(*) as total_requests'))
@@ -51,10 +51,10 @@ class CsvReportService
             ->all();
 
         return $this->writeCsv(
-            'reports/' . $filename,
+            'reports/'.$filename,
             [
                 'service_name',
-                'total_requests'
+                'total_requests',
             ],
             $rows
         );
@@ -62,7 +62,7 @@ class CsvReportService
 
     public function generateLatenciesReport(?string $filename = null): string
     {
-        $filename ??= 'latencies_report_' . now()->format('Ymd_His') . '.csv';
+        $filename ??= 'latencies_report_'.now()->format('Ymd_His').'.csv';
 
         $rows = Log::query()
             ->select(
@@ -83,12 +83,12 @@ class CsvReportService
             ->all();
 
         return $this->writeCsv(
-            'reports/' . $filename,
+            'reports/'.$filename,
             [
                 'service_name',
                 'avg_latency_proxy',
                 'avg_latency_gateway',
-                'avg_latency_request'
+                'avg_latency_request',
             ],
             $rows
         );
@@ -96,11 +96,11 @@ class CsvReportService
 
     private function writeCsv(string $path, array $header, array $rows): string
     {
-        $csv = Writer::from(new SplTempFileObject());
+        $csv = Writer::from(new SplTempFileObject);
         $csv->insertOne($header);
         $csv->insertAll($rows);
 
-        $fullPath = storage_path('app/' . $path);
+        $fullPath = storage_path('app/'.$path);
 
         File::ensureDirectoryExists(dirname($fullPath));
         File::put($fullPath, $csv->toString());

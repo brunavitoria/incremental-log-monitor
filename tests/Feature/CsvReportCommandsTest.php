@@ -21,9 +21,9 @@ class CsvReportCommandsTest extends TestCase
 
         $content = File::get(storage_path('app/reports/consumers_test.csv'));
 
-        $this->assertStringContainsString("consumer_id,total_requests", $content);
-        $this->assertStringContainsString("consumer-a,2", $content);
-        $this->assertStringContainsString("consumer-b,1", $content);
+        $this->assertStringContainsString('consumer_id,total_requests', $content);
+        $this->assertStringContainsString('consumer-a,2', $content);
+        $this->assertStringContainsString('consumer-b,1', $content);
     }
 
     public function test_it_generates_the_services_report_csv(): void
@@ -36,9 +36,9 @@ class CsvReportCommandsTest extends TestCase
 
         $content = File::get(storage_path('app/reports/services_test.csv'));
 
-        $this->assertStringContainsString("service_name,total_requests", $content);
-        $this->assertStringContainsString("service-a,2", $content);
-        $this->assertStringContainsString("service-b,1", $content);
+        $this->assertStringContainsString('service_name,total_requests', $content);
+        $this->assertStringContainsString('service-a,2', $content);
+        $this->assertStringContainsString('service-b,1', $content);
     }
 
     public function test_it_generates_the_latencies_report_csv(): void
