@@ -47,13 +47,19 @@ docker compose up -d --build
 docker exec ilm-app php artisan key:generate --force
 ```
 
-### 5. Executar as migrations
+### 5. Ajustar permissões das pastas do Laravel
+
+```text
+docker exec ilm-app chmod -R 777 storage bootstrap/cache
+```
+
+### 6. Executar as migrations
 
 ```text
 docker exec ilm-app php artisan migrate --force
 ```
 
-### 6. Acessar a aplicação
+### 7. Acessar a aplicação
 
 Abra no navegador:
 
