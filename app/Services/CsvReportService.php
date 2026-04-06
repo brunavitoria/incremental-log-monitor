@@ -60,6 +60,40 @@ class CsvReportService
         );
     }
 
+    public function generateLatenciesReport(?string $filename = null): string
+    {
+        $filename ??= 'latencies_report_' . now()->format('Ymd_His') . '.csv';
+
+        $rows = Log::query()
+            ->select(
+                'service_name',
+                DB::raw('ROUND(AVG(latencies_proxy), 2) as avg_latency_proxy'),
+                DB::raw('ROUND(AVG(latencies_gateway), 2) as avg_latency_gateway'),
+                DB::raw('ROUND(AVG(latencies_request), 2) as avg_latency_request')
+            )
+            ->groupBy('service_name')
+            ->orderBy('service_name')
+            ->get()
+            ->map(fn (Log $log) => [
+                $log->service_name,
+                (float) $log->avg_latency_proxy,
+                (float) $log->avg_latency_gateway,
+                (float) $log->avg_latency_request,
+            ])
+            ->all();
+
+        return $this->writeCsv(
+            'reports/' . $filename,
+            [
+                'service_name',
+                'avg_latency_proxy',
+                'avg_latency_gateway',
+                'avg_latency_request'
+            ],
+            $rows
+        );
+    }
+
     private function writeCsv(string $path, array $header, array $rows): string
     {
         $csv = Writer::from(new SplTempFileObject());
