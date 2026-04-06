@@ -63,6 +63,7 @@ class IncrementalLogProcessing extends Command
 
             if ($logData === null) {
                 $skippedLogs++;
+
                 continue;
             }
 
@@ -96,7 +97,7 @@ class IncrementalLogProcessing extends Command
         $data = json_decode($log, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->warn("Linha {$lineNumber} ignorada: JSON inválido - " . json_last_error_msg());
+            $this->warn("Linha {$lineNumber} ignorada: JSON inválido - ".json_last_error_msg());
 
             return null;
         }
@@ -117,7 +118,7 @@ class IncrementalLogProcessing extends Command
         $missingFields = $this->missingRequiredFields($parsedLog);
 
         if ($missingFields !== []) {
-            $this->warn('Linha ' . $lineNumber . ' ignorada: campos obrigatórios ausentes ou inválidos (' . implode(', ', $missingFields) . ').');
+            $this->warn('Linha '.$lineNumber.' ignorada: campos obrigatórios ausentes ou inválidos ('.implode(', ', $missingFields).').');
 
             return null;
         }
@@ -195,4 +196,3 @@ class IncrementalLogProcessing extends Command
             : Carbon::createFromTimestamp($timestamp);
     }
 }
-
