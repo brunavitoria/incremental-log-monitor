@@ -35,6 +35,31 @@ class CsvReportService
         );
     }
 
+    public function generateServicesReport(?string $filename = null): string
+    {
+        $filename ??= 'services_report_' . now()->format('Ymd_His') . '.csv';
+
+        $rows = Log::query()
+            ->select('service_name', DB::raw('COUNT(*) as total_requests'))
+            ->groupBy('service_name')
+            ->orderBy('service_name')
+            ->get()
+            ->map(fn (Log $log) => [
+                $log->service_name,
+                (int) $log->total_requests,
+            ])
+            ->all();
+
+        return $this->writeCsv(
+            'reports/' . $filename,
+            [
+                'service_name',
+                'total_requests'
+            ],
+            $rows
+        );
+    }
+
     private function writeCsv(string $path, array $header, array $rows): string
     {
         $csv = Writer::from(new SplTempFileObject());
