@@ -69,6 +69,71 @@ class IncrementalLogProcessingTest extends TestCase
         ]);
     }
 
+    public function test_it_skips_lines_with_invalid_json(): void
+    {
+        $filePath = $this->makeLogFile([
+            '{invalid json',
+            'not even close to json',
+            $this->makeValidLogLine('consumer-1', 'service-a', 100, 10, 120, 1712400000000),
+            '',
+            '{"incomplete": true',
+        ]);
+
+        $this->artisan('logs:processing', ['file_path' => $filePath])
+            ->expectsOutputToContain('Registros salvos: 1')
+            ->expectsOutputToContain('Linhas ignoradas: 4')
+            ->assertSuccessful();
+
+        $this->assertDatabaseCount('logs', 1);
+        $this->assertDatabaseHas('logs', ['consumer_id' => 'consumer-1']);
+    }
+
+    public function test_it_handles_empty_file_gracefully(): void
+    {
+        $filePath = $this->makeLogFile([]);
+
+        $this->artisan('logs:processing', ['file_path' => $filePath])
+            ->expectsOutputToContain('Registros salvos: 0')
+            ->expectsOutputToContain('Linhas ignoradas: 0')
+            ->assertSuccessful();
+
+        $this->assertDatabaseCount('logs', 0);
+    }
+
+    public function test_it_fails_when_file_does_not_exist(): void
+    {
+        $this->artisan('logs:processing', ['file_path' => '/tmp/non_existent_file_'.uniqid().'.log'])
+            ->expectsOutputToContain('não existe ou não é legível')
+            ->assertFailed();
+
+        $this->assertDatabaseCount('logs', 0);
+        $this->assertDatabaseCount('processing_states', 0);
+    }
+
+    public function test_reprocessing_without_new_lines_does_not_insert_anything(): void
+    {
+        $filePath = $this->makeLogFile([
+            $this->makeValidLogLine('consumer-1', 'service-a', 100, 10, 120, 1712400000000),
+        ]);
+
+        $this->artisan('logs:processing', ['file_path' => $filePath])
+            ->expectsOutputToContain('Registros salvos: 1')
+            ->assertSuccessful();
+
+        $this->assertDatabaseCount('logs', 1);
+
+        $this->artisan('logs:processing', ['file_path' => $filePath])
+            ->expectsOutputToContain('Registros salvos: 0')
+            ->expectsOutputToContain('Linhas ignoradas: 0')
+            ->assertSuccessful();
+
+        $this->assertDatabaseCount('logs', 1);
+        $this->assertDatabaseHas('processing_states', [
+            'file_path' => realpath($filePath) ?: $filePath,
+            'last_processed_line' => 1,
+        ]);
+    }
+
     /**
      * @param  array<int, string>  $lines
      */
@@ -79,7 +144,8 @@ class IncrementalLogProcessingTest extends TestCase
         File::ensureDirectoryExists($directory);
 
         $filePath = $directory.'/logs_'.uniqid().'.log';
-        File::put($filePath, implode(PHP_EOL, $lines).PHP_EOL);
+        $content = $lines !== [] ? implode(PHP_EOL, $lines).PHP_EOL : '';
+        File::put($filePath, $content);
 
         return $filePath;
     }
